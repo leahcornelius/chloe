@@ -22,15 +22,14 @@ OWNER_ID = "634078084798349313"
 NEED_MENTION = True
 OWNER_BYPASS_MENTION = True
 CHANNEL_LOCK = ""
-
+token = "ODM3MzUwOTcyNDY0NDMxMTY1.YM3J9Q.Xz3xIlDzlYsLNxqdnJPwDjQ39z4"
 
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-client = commands.Bot(command_prefix="BOT_NAME")
-
+client = discord.Client()
 global translator
 
 global num_samples
@@ -182,7 +181,7 @@ def run_chat():
 
     num_samples = config.getint('decoder', 'num_samples')
     max_turns_history = config.getint('decoder', 'max_turns_history')
-
+    token = "ODM3MzUwOTcyNDY0NDMxMTY1.YM3J9Q.Xz3xIlDzlYsLNxqdnJPwDjQ39z4"
     logger.info("Running the chatbot...")
     turns = []
     loop = asyncio.get_event_loop()

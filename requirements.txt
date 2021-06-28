@@ -5,3 +5,7 @@ python-telegram-bot>=13.1
 googletrans
 textblob
 discord.py-self
+gtts
+flask_cors
+flask
+flask_ngrok
