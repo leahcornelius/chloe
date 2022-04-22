@@ -5,7 +5,6 @@ import time
 from flask import render_template
 import flask
 from flask_cors import CORS, cross_origin
-from flask_ngrok import run_with_ngrok
 from .utils import *
 
 logger = setup_logger(__name__)
@@ -32,7 +31,6 @@ number_of_sent_messages = 0
 
 app = flask.Flask(__name__, static_folder="UI/dist", template_folder="UI/dist")
 cors = CORS(app)
-run_with_ngrok(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config["DEBUG"] = True
 
@@ -186,7 +184,7 @@ def run(**kwargs):
     logger.info("Running the api...")
     
 
-    app.run()
+    app.run(host='0.0.0.0', debug=True)
 
 
 
