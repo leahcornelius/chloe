@@ -167,7 +167,7 @@ def bubble_info(bubble_id, auth_token):
     elif bubble_id not in bubbles:
         return "{\"error\": 4}"  # bubble does not exists
 
-    return "{\"info\":" + " {}}".format(json.dumps(bubbles[bubble_id]))
+    return "{\"info\": " + json.dumps(bubbles[bubble_id]) + "}"
 
 
 def run(**kwargs):
