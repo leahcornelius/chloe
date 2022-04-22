@@ -8,4 +8,3 @@ discord.py-self
 gtts
 flask_cors
 flask
-flask_ngrok

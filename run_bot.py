@@ -1,6 +1,6 @@
 import argparse
 
-from gpt2bot.telegram_bot import run as run_telegram_bot
+#from gpt2bot.telegram_bot import run as run_telegram_bot
 from gpt2bot.console_bot import run_console_bot
 from gpt2bot.discord_bot import run as run_discord_bot
 from gpt2bot.dialogue_bot import run_dialoge_bot
