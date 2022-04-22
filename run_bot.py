@@ -1,9 +1,9 @@
 import argparse
 
 from gpt2bot.telegram_bot import run as run_telegram_bot
-from gpt2bot.console_bot import run as run_console_bot
+from gpt2bot.console_bot import run_console_bot
 from gpt2bot.discord_bot import run as run_discord_bot
-from gpt2bot.dialogue import run as run_dialogue
+from gpt2bot.dialogue_bot import run_dialoge_bot
 from gpt2bot.utils import parse_config
 from gpt2bot.api import run as api_run
 
@@ -13,12 +13,12 @@ if __name__ == '__main__':
         '--type',
         type=str,
         default='discord',
-        help="Type of the conversation to run: telegram, console, dialogue or discord"
+        help="Type of the conversation to run: telegram, console, dialogue or discord (api must be running using the api option)"
     )
     arg_parser.add_argument(
         '--config',
         type=str,
-        default='default_config.cfg',
+        default='chatbot.cfg',
         help="Path to the config"
     )
     args = arg_parser.parse_args()
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     elif args.type == 'console':
         run_console_bot(**config)
     elif args.type == 'dialogue':
-        run_dialogue(**config)
+        run_dialoge_bot(**config)
     elif args.type == 'discord':
         run_discord_bot(**config)
     elif args.type == 'api':

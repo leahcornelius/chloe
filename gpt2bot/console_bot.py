@@ -1,108 +1,41 @@
-from .utils import *
-
-logger = setup_logger(__name__)
-
-
-def start_message():
-    print("Bot:",
-          "Just start texting me. "
-          "If I'm getting annoying, type \"/reset\". "
-          "To quit the chat, press Ctrl-C.")
+import random
+import string
+from api_client import ApiClient
+from random import randint
 
 
-def reset_message():
-    print("Bot:", "Beep beep!")
+def create_api():
+    host = input("Enter API host (ip:port): ")
+    if host == "":
+        host = "192.168.1.146:5000"
+    secret = input("Enter API secret: ")
+    if secret == "":
+        secret = "qwertybob_key01"
+    api = ApiClient(host, secret, "client-{}".format(randint(0, 200)))
+    api.authenticate()
+    return api
 
 
-def run(**kwargs):
-    """Run the console bot."""
+def run_console_bot():
+    api = create_api()
+    bubble_id = ''.join(random.choice(string.ascii_lowercase)
+                        for i in range(30))
+    api.create_bubble(bubble_id)
+    print("----------------------------------------------------------")
+    print("Connected to API and created bubble context ({})".format(bubble_id))
+    print("You can now talk to me, to exit press Ctrl-C")
+    print("To restart the conversation/clear my memory type /reset")
+    print("----------------------------------------------------------")
+    while True:
+        message = input("User > ")
+        if message == "/reset":
+            print("---- RESET HISTORY ----")
+            bubble_id = ''.join(random.choice(string.ascii_lowercase)
+                                for i in range(30))
+            api.create_bubble(bubble_id)
+            continue
 
-    # Extract parameters
-    general_params = kwargs.get('general_params', {})
-    device = general_params.get('device', -1)
-    seed = general_params.get('seed', None)
-    debug = general_params.get('debug', False)
+        response = api.get_response(message, bubble_id)
+        print("Bot > {}".format(response))
 
-    generation_pipeline_kwargs = kwargs.get('generation_pipeline_kwargs', {})
-    generation_pipeline_kwargs = {**{
-        'model': 'microsoft/DialoGPT-medium'
-    }, **generation_pipeline_kwargs}
 
-    generator_kwargs = kwargs.get('generator_kwargs', {})
-    generator_kwargs = {**{
-        'max_length': 1000,
-        'do_sample': True,
-        'clean_up_tokenization_spaces': True
-    }, **generator_kwargs}
-
-    prior_ranker_weights = kwargs.get('prior_ranker_weights', {})
-    cond_ranker_weights = kwargs.get('cond_ranker_weights', {})
-
-    chatbot_params = kwargs.get('chatbot_params', {})
-    max_turns_history = chatbot_params.get('max_turns_history', 2)
-
-    # Prepare the pipelines
-    generation_pipeline = load_pipeline('text-generation', device=device, **generation_pipeline_kwargs)
-    ranker_dict = build_ranker_dict(device=device, **prior_ranker_weights, **cond_ranker_weights)
-
-    # Run the chatbot
-    logger.info("Running the console bot...")
-
-    turns = []
-    start_message()
-    try:
-        while True:
-            prompt = input("User: ")
-            if max_turns_history == 0:
-                turns = []
-            if prompt.lower() == '/start':
-                start_message()
-                turns = []
-                continue
-            if prompt.lower() == '/reset':
-                reset_message()
-                turns = []
-                continue
-            if prompt.startswith('/'):
-                print('Command not recognized.')
-                continue
-            # A single turn is a group of user messages and bot responses right after
-            turn = {
-                'user_messages': [],
-                'bot_messages': []
-            }
-            turns.append(turn)
-            turn['user_messages'].append(prompt)
-            # Merge turns into a single prompt (don't forget delimiter)
-            prompt = ""
-            from_index = max(len(turns) - max_turns_history - 1, 0) if max_turns_history >= 0 else 0
-            for turn in turns[from_index:]:
-                # Each turn begins with user messages
-                for user_message in turn['user_messages']:
-                    prompt += clean_text(user_message) + generation_pipeline.tokenizer.eos_token
-                for bot_message in turn['bot_messages']:
-                    prompt += clean_text(bot_message) + generation_pipeline.tokenizer.eos_token
-
-            # Generate bot messages
-            bot_messages = generate_responses(
-                prompt,
-                generation_pipeline,
-                seed=seed,
-                debug=debug,
-                **generator_kwargs
-            )
-            if len(bot_messages) == 1:
-                bot_message = bot_messages[0]
-            else:
-                bot_message = pick_best_response(
-                    prompt,
-                    bot_messages,
-                    ranker_dict,
-                    debug=debug
-                )
-            print("Bot:", bot_message)
-            turn['bot_messages'].append(bot_message)
-    except KeyboardInterrupt:
-        exit()
-    except:
-        raise

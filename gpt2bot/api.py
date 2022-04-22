@@ -1,5 +1,6 @@
 # Copyright (c) 2020 Leo Cornelius
 #  Licensed under the MIT license.
+import json
 import string
 import time
 from flask import render_template
@@ -33,9 +34,11 @@ cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config["DEBUG"] = True
 
+
 @app.route('/')
 def my_index():
     return render_template("index.html")
+
 
 @app.route("/auth/<device_id>/<tried_passcode>")
 @cross_origin()
@@ -43,12 +46,15 @@ def auth(device_id, tried_passcode):
     global passcode, auth_tokens
     if tried_passcode != passcode:
         time.sleep(2)
-        return "{\"error\": 2}" # Incorrect passcode
+        return "{\"error\": 2}"  # Incorrect passcode
     else:
-        token = ''.join(random.choice(string.ascii_lowercase) for i in range(20))
+        token = ''.join(random.choice(string.ascii_lowercase)
+                        for i in range(20))
         print("new device: {}, token: {}".format(device_id, token))
         auth_tokens.append(token)
         return "{\"token\":" + "\"{}\"".format(token) + "}"
+
+
 @app.route('/get_response/<prompt>/<bubble_id>/<auth_token>', methods=['GET'])
 @cross_origin()
 def get_response(prompt, bubble_id, auth_token):
@@ -67,16 +73,17 @@ def get_response(prompt, bubble_id, auth_token):
     global auth_tokens
     global bubbles
     if auth_token not in auth_tokens:
-        return "{\"error\": 0}" # not authenticated
+        return "{\"error\": 0}"  # not authenticated
     elif bubble_id not in bubbles:
         print("Bubble {} not in bubble list, bubbles: ".format(bubble_id))
         for bubble in bubbles:
             print(bubble)
-        return "{\"error\": 1}" # bubble does not exist
+        return "{\"error\": 1}"  # bubble does not exist
 
     print("User ({}) >>> {}".format(bubble_id, prompt))
-    
-    if (bubbles[bubble_id]["max_turns_history"] == 0 or prompt.lower() == "reset"):  # eg if she should have no memory
+
+    # eg if she should have no memory
+    if (bubbles[bubble_id]["max_turns_history"] == 0 or prompt.lower() == "reset"):
         bubbles[bubble_id]["history"] = []
 
     # A single turn is a group of user messages and bot responses right after
@@ -118,31 +125,53 @@ def get_response(prompt, bubble_id, auth_token):
             ranker_dict,
             debug=debug
         )
-        logger.info('Bot (best response) ({}): {}'.format(bubble_id, bot_message))
+        logger.info('Bot (best response) ({}): {}'.format(
+            bubble_id, bot_message))
     turn['bot_messages'].append(bot_message)
     return "{\"response\":" + " \"{}\"".format(bot_message) + "}"
 
+
 @app.route('/create_bubble/<bubble_id>/<max_turns_history>/<auth_token>', methods=['GET'])
+@app.route('/create_bubble/<bubble_id>/<max_turns_history>/<auth_token>/<start>', methods=['GET'])
 @cross_origin()
-def create_bubble(bubble_id, max_turns_history, auth_token):
+def create_bubble(bubble_id, max_turns_history, auth_token, start=""):
     if auth_token not in auth_tokens:
         print("Token {} not in list, tokens:".format(auth_token))
         for token in auth_tokens:
             print(token)
-        return "{\"error\": 0}" # not authenticated
+        return "{\"error\": 0}"  # not authenticated
     elif bubble_id in bubbles:
-        return "{\"error\": 3}" # bubble already exists
+        return "{\"error\": 3}"  # bubble already exists
     else:
         bubbles[bubble_id] = {
             "max_turns_history": int(max_turns_history),
-            "history": [] # TODO: permant memories via param
+            "history": []  # TODO: permant memories via param
         }
+        if start != "":
+            turn = {
+                'user_messages': [start],
+                'bot_messages': []
+            }
+            bubbles[bubble_id]["history"].append(turn)
         return "{\"bubble_id\": " + "\"{}\"".format(bubble_id) + "}"
 
 
+@app.route('/bubble_info/<bubble_id>/<auth_token>', methods=['GET'])
+@cross_origin()
+def bubble_info(bubble_id, auth_token):
+    if auth_token not in auth_tokens:
+        print("Token {} not in list, tokens:".format(auth_token))
+        for token in auth_tokens:
+            print(token)
+        return "{\"error\": 0}"  # not authenticated
+    elif bubble_id not in bubbles:
+        return "{\"error\": 4}"  # bubble does not exists
+
+    return "{\"info\": {}}".format(json.dumps(bubbles[bubble_id]))
+
 
 def run(**kwargs):
-      # Extract parameters
+    # Extract parameters
     global general_params
     global device
     global seed
@@ -186,9 +215,5 @@ def run(**kwargs):
 
     # Run the api
     logger.info("Running the api...")
-    
 
     app.run(host='0.0.0.0', debug=True)
-
-
-

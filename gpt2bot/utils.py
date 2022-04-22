@@ -237,6 +237,7 @@ def generate_scores(prompt, responses, pipeline, **kwargs):
 def pick_best_response(prompt, responses, ranker_dict, debug=False):
     """Pick the best response according to the weighted average of scores."""
     if len(ranker_dict) == 0:
+        logger.debug("ranker_dict empty, making random choice")
         return random.choice(responses)
 
     def _get_wa_group_scores(group_name):
