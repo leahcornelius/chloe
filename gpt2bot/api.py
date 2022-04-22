@@ -103,6 +103,7 @@ def get_response(prompt, bubble_id, auth_token):
                 generation_pipeline.tokenizer.eos_token
 
     # Generate bot messages
+    logger.info("Context: {}".format(prompt))
     bot_messages = generate_responses(
         prompt,
         generation_pipeline,
