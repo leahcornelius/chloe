@@ -136,6 +136,7 @@ def create_bubble(bubble_id, max_turns_history, auth_token):
             "max_turns_history": int(max_turns_history),
             "history": [] # TODO: permant memories via param
         }
+        return "{\"bubble_id\": " + "\"{}\"".format(bubble_id) + "}"
 
 
 
