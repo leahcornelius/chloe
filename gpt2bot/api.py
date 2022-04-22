@@ -122,7 +122,7 @@ def get_response(prompt, bubble_id, auth_token):
     return "{\"response\":" + " \"{}\"".format(bot_message) + "}"
 
 @app.route('/create_bubble/<bubble_id>/<max_turns_history>/<auth_token>', methods=['GET'])
-@cross_origin
+@cross_origin()
 def create_bubble(bubble_id, max_turns_history, auth_token):
     if auth_token not in auth_tokens:
         return "{\"error\": 0}" # not authenticated
