@@ -120,7 +120,7 @@ def get_response(prompt, bubble_id, auth_token):
             ranker_dict,
             debug=debug
         )
-        logger.info('Bot (best response) ({}}): {}'.format(bubble_id, bot_message))
+        logger.info('Bot (best response) ({}): {}'.format(bubble_id, bot_message))
     turn['bot_messages'].append(bot_message)
     return "{\"response\":" + " \"{}\"".format(bot_message) + "}"
 
