@@ -3,3 +3,5 @@ __pycache__
 .idea
 *.pkl
 *Anaconda*
+*cfg
+**/reddit.json

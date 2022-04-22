@@ -1,5 +1,7 @@
 # Copyright (c) 2020 Leo Cornelius
 #  Licensed under the MIT license.
+import string
+import time
 from flask import render_template
 import flask
 from flask_cors import CORS, cross_origin
@@ -8,8 +10,9 @@ from .utils import *
 
 logger = setup_logger(__name__)
 turns = []
-
-
+bubbles = {}
+auth_tokens = []
+passcode = "qwertybob_key01"
 
 global general_params
 global device
@@ -23,6 +26,7 @@ global chatbot_params
 global max_turns_history
 global generation_pipeline
 global ranker_dict
+
 number_of_sent_messages = 0
 
 
@@ -32,22 +36,26 @@ run_with_ngrok(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config["DEBUG"] = True
 
-
-admin_users = ['leocornelius', 'nathanarnold']
-
-
-# Serve React App
 @app.route('/')
 def my_index():
     return render_template("index.html")
-# Serve React App
-@app.route('/script.js')
-def my_js():
-    return app.send_static_file('script.js')
 
-@app.route('/get_response/<user_msg>', methods=['GET'])
+@app.route("/auth/<device_id>/<tried_passcode>")
 @cross_origin()
-def get_response(user_msg):
+def auth(device_id, tried_passcode):
+    global passcode, auth_tokens
+    if tried_passcode != passcode:
+        time.sleep(2)
+        return "{\"error\": 2}" # Incorrect passcode
+    else:
+        token = ''.join(random.choice(string.ascii_lowercase) for i in range(20))
+        print("new device: {}, token: {}".format(device_id, token))
+        auth_tokens.push(token)
+        return "{\"token\": \"{}\"}".format(token)
+
+@app.route('/get_response/<prompt>/<bubble_id>/<auth_token>', methods=['GET'])
+@cross_origin()
+def get_response(prompt, bubble_id, auth_token):
     global general_params
     global device
     global seed
@@ -61,23 +69,29 @@ def get_response(user_msg):
     global generation_pipeline
     global ranker_dict
     global turns
-    prompt = user_msg
-    print("User >>> {}".format(prompt))
-    logger.info('User:', prompt)
-    if (max_turns_history == 0 or prompt.lower() == "reset"):  # eg if she should have no memory
-        turns = []
+    global auth_tokens
+    global bubbles
+    if auth_token not in auth_tokens:
+        return "{\"error\": 0}" # not authenticated
+    elif bubble_id not in bubbles:
+        return "{\"error\": 1}" # bubble does not exist
+
+    print("User ({}) >>> {}".format(bubble_id, prompt))
+    
+    if (bubbles[bubble_id]["max_turns_history"] == 0 or prompt.lower() == "reset"):  # eg if she should have no memory
+        bubbles[bubble_id]["history"] = []
 
     # A single turn is a group of user messages and bot responses right after
     turn = {
         'user_messages': [],
         'bot_messages': []
     }
-    turns.append(turn)
-    turn['user_messages'].append(prompt)
+    bubbles[bubble_id]["history"].append(turn)
+    bubbles[bubble_id]["history"].append(prompt)
     # Merge turns into a single prompt (don't forget delimiter)
     prompt = ""
     from_index = max(len(turns) - max_turns_history - 1,
-                     0) if max_turns_history >= 0 else 0
+                     0) if bubbles[bubble_id]["max_turns_history"] >= 0 else 0
 
     for turn in turns[from_index:]:
         # Each turn begins with user messages
@@ -98,7 +112,7 @@ def get_response(user_msg):
     )
     if len(bot_messages) == 1:
         bot_message = bot_messages[0]
-        logger.info('Bot (S): {}'.format(bot_message))
+        logger.info('Bot ({}): {}'.format(bubble_id, bot_message))
     else:
         bot_message = pick_best_response(
             prompt,
@@ -106,11 +120,22 @@ def get_response(user_msg):
             ranker_dict,
             debug=debug
         )
-        logger.info('Bot (BR): {}'.format(bot_message))
+        logger.info('Bot (best response) ({}}): {}'.format(bubble_id, bot_message))
     turn['bot_messages'].append(bot_message)
-    return bot_message
+    return "{\"response\": \"{}\"}".format(bot_message)
 
-
+@app.route('/create_bubble/<bubble_id>/<max_turns_history>/<auth_token>', methods=['GET'])
+@cross_origin
+def create_bubble(bubble_id, max_turns_history, auth_token):
+    if auth_token not in auth_tokens:
+        return "{\"error\": 0}" # not authenticated
+    elif bubble_id in bubbles:
+        return "{\"error\": 3}" # bubble already exists
+    else:
+        bubbles[bubble_id] = {
+            "max_turns_history": int(max_turns_history),
+            "history": [] # TODO: permant memories via param
+        }
 
 
 
