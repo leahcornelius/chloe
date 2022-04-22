@@ -159,7 +159,8 @@ def parse_config(config_path):
             giphy_max_words=parse_optional_int(config, 'chatbot_params', 'giphy_max_words'),
             giphy_weirdness=parse_optional_int(config, 'chatbot_params', 'giphy_weirdness'),
             continue_after_restart=parse_optional_bool(config, 'chatbot_params', 'continue_after_restart'),
-            data_filename=config.get('chatbot_params', 'data_filename')
+            data_filename=config.get('chatbot_params', 'data_filename'),
+            discord_token=config.get('chatbot_params', 'discord_token')
         )
     )
 

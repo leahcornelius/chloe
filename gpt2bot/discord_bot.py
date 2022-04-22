@@ -36,7 +36,7 @@ def run(**kwargs):
     max_turns_history = chatbot_params.get('max_turns_history', 2)
     discord_token = chatbot_params.get('discord_token', None)
     # Connect to the API
-    api_client = ApiClient("127.0.0.1:5000", "qwertybob_key01", "discord_bot")
+    api_client = ApiClient("192.168.1.146:5000", "qwertybob_key01", "discord_bot")
     api_client.authenticate()
 
     # Run the chatbot

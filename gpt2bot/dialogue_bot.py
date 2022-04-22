@@ -16,7 +16,7 @@ def create_api():
     return api
 
 
-def run_dialoge_bot():
+def run_dialoge_bot(**params):
     api = create_api()
     bubble_id = ''.join(random.choice(string.ascii_lowercase)
                         for i in range(30))
