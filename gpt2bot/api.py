@@ -8,7 +8,6 @@ from flask_cors import CORS, cross_origin
 from .utils import *
 
 logger = setup_logger(__name__)
-turns = []
 bubbles = {}
 auth_tokens = []
 passcode = "qwertybob_key01"
@@ -65,7 +64,6 @@ def get_response(prompt, bubble_id, auth_token):
     global max_turns_history
     global generation_pipeline
     global ranker_dict
-    global turns
     global auth_tokens
     global bubbles
     if auth_token not in auth_tokens:
@@ -90,10 +88,10 @@ def get_response(prompt, bubble_id, auth_token):
     bubbles[bubble_id]["history"].append(prompt)
     # Merge turns into a single prompt (don't forget delimiter)
     prompt = ""
-    from_index = max(len(turns) - max_turns_history - 1,
+    from_index = max(len(bubbles[bubble_id]["history"]) - max_turns_history - 1,
                      0) if bubbles[bubble_id]["max_turns_history"] >= 0 else 0
 
-    for turn in turns[from_index:]:
+    for turn in bubbles[bubble_id]["history"][from_index:]:
         # Each turn begins with user messages
         for user_message in turn['user_messages']:
             prompt += clean_text(user_message) + \
