@@ -49,8 +49,7 @@ def auth(device_id, tried_passcode):
         token = ''.join(random.choice(string.ascii_lowercase) for i in range(20))
         print("new device: {}, token: {}".format(device_id, token))
         auth_tokens.append(token)
-        return "{\"token\": \"{}\"}".format(token)
-
+        return "{\"token\":" + "\"{}\"".format(token) + "}"
 @app.route('/get_response/<prompt>/<bubble_id>/<auth_token>', methods=['GET'])
 @cross_origin()
 def get_response(prompt, bubble_id, auth_token):
@@ -120,7 +119,7 @@ def get_response(prompt, bubble_id, auth_token):
         )
         logger.info('Bot (best response) ({}}): {}'.format(bubble_id, bot_message))
     turn['bot_messages'].append(bot_message)
-    return "{\"response\": \"{}\"}".format(bot_message)
+    return "{\"response\":" + " \"{}\"".format(bot_message) + "}"
 
 @app.route('/create_bubble/<bubble_id>/<max_turns_history>/<auth_token>', methods=['GET'])
 @cross_origin
