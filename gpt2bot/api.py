@@ -48,7 +48,7 @@ def auth(device_id, tried_passcode):
     else:
         token = ''.join(random.choice(string.ascii_lowercase) for i in range(20))
         print("new device: {}, token: {}".format(device_id, token))
-        auth_tokens.push(token)
+        auth_tokens.append(token)
         return "{\"token\": \"{}\"}".format(token)
 
 @app.route('/get_response/<prompt>/<bubble_id>/<auth_token>', methods=['GET'])
