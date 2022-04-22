@@ -1,9 +1,13 @@
 import configparser
 import logging
-import transformers
 import numpy as np
 import random
-
+TRANSFORMERS_IMPORTED = True
+try:
+    import transformers
+except: # Enabled so that configparse can be used on devices not using transformers (eg those acessing a remote api)
+    print("Failed to import transformers, you will not be able to run the AI code")
+    TRANSFORMERS_IMPORTED = False
 
 class CustomFormatter(logging.Formatter):
     """Logging Formatter to add colors and count warning / errors"""
@@ -50,7 +54,8 @@ def setup_logger(name):
 
 
 # Set up logging
-transformers.logging.set_verbosity_error()
+if TRANSFORMERS_IMPORTED:
+    transformers.logging.set_verbosity_error()
 
 logger = setup_logger(__name__)
 
@@ -161,6 +166,8 @@ def parse_config(config_path):
 
 def load_pipeline(task, **kwargs):
     """Load a pipeline."""
+    if not TRANSFORMERS_IMPORTED:
+        logger.error("Transformers has not been imported")
     logger.info(f"Loading the pipeline '{kwargs.get('model')}'...")
 
     return transformers.pipeline(task, **kwargs)

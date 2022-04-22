@@ -1,6 +1,6 @@
 import random
 import string
-from api_client import ApiClient
+from gpt2bot.api_client import ApiClient
 from random import randint
 
 

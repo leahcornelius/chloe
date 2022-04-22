@@ -2,7 +2,7 @@ import discord
 from .utils import *
 from random import randint
 from time import sleep
-from api_client import ApiClient
+from gpt2bot.api_client import ApiClient
 
 logger = setup_logger(__name__)
 

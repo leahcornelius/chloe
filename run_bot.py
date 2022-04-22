@@ -1,11 +1,7 @@
 import argparse
 
 #from gpt2bot.telegram_bot import run as run_telegram_bot
-from gpt2bot.console_bot import run_console_bot
-from gpt2bot.discord_bot import run as run_discord_bot
-from gpt2bot.dialogue_bot import run_dialoge_bot
 from gpt2bot.utils import parse_config
-from gpt2bot.api import run as api_run
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
@@ -25,15 +21,17 @@ if __name__ == '__main__':
     config_path = args.config
     config = parse_config(config_path)
 
-    if args.type == 'telegram':
-        run_telegram_bot(**config)
-    elif args.type == 'console':
+    if args.type == 'console':
+        from gpt2bot.console_bot import run_console_bot
         run_console_bot(**config)
     elif args.type == 'dialogue':
+        from gpt2bot.dialogue_bot import run_dialoge_bot
         run_dialoge_bot(**config)
     elif args.type == 'discord':
+        from gpt2bot.discord_bot import run as run_discord_bot
         run_discord_bot(**config)
     elif args.type == 'api':
+        from gpt2bot.api import run as api_run
         api_run(**config)
     else:
         raise ValueError("Unrecognized conversation type")
