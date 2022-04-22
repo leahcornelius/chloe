@@ -125,7 +125,7 @@ def get_response(prompt, bubble_id, auth_token):
 @cross_origin()
 def create_bubble(bubble_id, max_turns_history, auth_token):
     if auth_token not in auth_tokens:
-        print("Token {} not in list, tokens:".format(token))
+        print("Token {} not in list, tokens:".format(auth_token))
         for token in auth_tokens:
             print(token)
         return "{\"error\": 0}" # not authenticated
