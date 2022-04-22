@@ -54,7 +54,7 @@ class ApiClient():
         if self.token is None:
             print("Cannot create bubble, not authenticated")
         else:
-            response = requests.get('http://{}/get_response/{}/{}/{}'.format(self.api_host, quote(prompt), quote(bubble_id), self.token))
+            response = requests.get('http://{}/get_response/{}/{}/{}'.format(self.api_host, quote(prompt).encode('unicode').hex(), quote(bubble_id), self.token))
             json = response.json()
             if 'error' not in json:
                 return json['response']

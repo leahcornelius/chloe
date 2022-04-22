@@ -79,7 +79,7 @@ def get_response(prompt, bubble_id, auth_token):
         for bubble in bubbles:
             print(bubble)
         return "{\"error\": 1}"  # bubble does not exist
-
+    prompt = bytes.fromhex(prompt).decode('unicode')
     print("User ({}) >>> {}".format(bubble_id, prompt))
 
     # eg if she should have no memory
