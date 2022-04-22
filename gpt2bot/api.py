@@ -81,11 +81,10 @@ def get_response(prompt, bubble_id, auth_token):
 
     # A single turn is a group of user messages and bot responses right after
     turn = {
-        'user_messages': [],
+        'user_messages': [prompt],
         'bot_messages': []
     }
     bubbles[bubble_id]["history"].append(turn)
-    bubbles[bubble_id]["history"].append(prompt)
     # Merge turns into a single prompt (don't forget delimiter)
     prompt = ""
     from_index = max(len(bubbles[bubble_id]["history"]) - max_turns_history - 1,
