@@ -71,6 +71,9 @@ def get_response(prompt, bubble_id, auth_token):
     if auth_token not in auth_tokens:
         return "{\"error\": 0}" # not authenticated
     elif bubble_id not in bubbles:
+        print("Bubble {} not in bubble list, bubbles: ".format(bubble_id))
+        for bubble in bubbles:
+            print(bubble)
         return "{\"error\": 1}" # bubble does not exist
 
     print("User ({}) >>> {}".format(bubble_id, prompt))
